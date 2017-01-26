@@ -66,6 +66,8 @@ type Config struct {
 
 	// Disable collecting GC Statistics (requires Memory be not be disabled). mem.gc.*
 	DisableGc bool
+	
+	AutoCreateDB bool
 
 	// Default is DefaultLogger which exits when the library encounters a fatal error.
 	Logger Logger
@@ -131,10 +133,12 @@ func RunCollector(config *Config) (err error) {
 	}
 
 	// Auto create database
-	_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE \"%s\"", config.Database))
+	if config.AutoCreateDB {
+		_, err = queryDB(clnt, fmt.Sprintf("CREATE DATABASE \"%s\"", config.Database))
 
-	if err != nil {
-		config.Logger.Fatalln(err)
+		if err != nil {
+			config.Logger.Fatalln(err)
+		}
 	}
 
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
